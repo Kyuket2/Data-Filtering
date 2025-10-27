@@ -17,14 +17,14 @@ df <- df %>%
     v_esc_kms   = 11.2  * sqrt(pl_bmasse / pl_rade)
   )
 
-# 3) Keep  certain rows
+# Keep  certain rows
 need <- c("pl_eqt","v_esc_kms","density_gcc")
 df <- df[complete.cases(df[ , need]), ]
 
 cat("After filter — unique pl_name:", length(unique(df$pl_name)), "\n")
 print(head(df[ , c("pl_name","hostname")], 10))
 
-# 4) Scores (clamped)
+# Scores (clamped)
 S_T <- 1 - abs(df$pl_eqt - 275) / 75
 S_V <- (pmin(df$v_esc_kms, 20) - 8) / 12
 S_D <- (pmin(df$density_gcc, 10) - 3) / 7
@@ -32,11 +32,11 @@ df$S_T <- pmax(pmin(S_T, 1), 0)
 df$S_V <- pmax(pmin(S_V, 1), 0)
 df$S_D <- pmax(pmin(S_D, 1), 0)
 
-# 5) WRS
+# WRS
 w_T <- 0.52; w_V <- 0.31; w_D <- 0.17
 df$WRS <- w_T*df$S_T + w_V*df$S_V + w_D*df$S_D
 
-# 6) Earth Data
+# Earth Data
 earth <- data.frame(
   pl_name     = "Earth",
   pl_eqt      = 288,
