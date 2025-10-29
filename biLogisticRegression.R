@@ -1,4 +1,3 @@
-install.packages("DT")
 library(DT)
 library(ggplot2)
 windows()
