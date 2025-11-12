@@ -24,10 +24,65 @@ df <- df[complete.cases(df[ , need]), ]
 model_full  <- glm(can_hold_water ~ pl_eqt + v_esc_kms + density_gcc,
                    data = df, family = binomial)
 
-# Small data
+# Set the seed
 set.seed(42)
-n_small     <- min(200, nrow(df))     # Sample Size
-df_small    <- df[sample(nrow(df), n_small), ]
+
+# Clean names
+df$pl_name <- trimws(df$pl_name)
+
+# Make an Earth row
+if (!"Earth" %in% df$pl_name) {
+  earth_row <- as.data.frame(setNames(as.list(rep(NA, ncol(df))), names(df)))
+
+  # Fill the fields
+  earth_row$pl_name        <- "Earth"
+  earth_row$pl_eqt         <- 288
+  earth_row$v_esc_kms      <- 11.2
+  earth_row$density_gcc    <- 5.51
+  earth_row$can_hold_water <- 1
+
+  # Bind it
+  df <- rbind(df, earth_row)
+}
+# Choose sample size
+n_small <- min(500, nrow(df))
+
+# Stratified sample
+pos_idx   <- which(df$can_hold_water == 1 & non_earth)
+neg_idx   <- which(df$can_hold_water == 0 & non_earth)
+
+# Target split
+target_pos <- max(1, min(length(pos_idx), ceiling(n_small * 0.30)))
+target_neg <- max(1, min(length(neg_idx), n_small - target_pos - 1))  # -1 reserves Earth
+
+# Sample indices
+pos_take <- if (length(pos_idx) > 0) sample(pos_idx, target_pos) else integer(0)
+neg_take <- if (length(neg_idx) > 0) sample(neg_idx, target_neg) else integer(0)
+
+# Build small sample and append Earth
+df_small <- rbind(
+  df[pos_take, , drop = FALSE],
+  df[neg_take, , drop = FALSE],
+  df[df$pl_name == "Earth", , drop = FALSE]
+)
+
+# Trim if overshot, but keep Earth
+if (nrow(df_small) > n_small) {
+  earth_i  <- which(df_small$pl_name == "Earth")[1]
+  keep_idx <- c(
+    earth_i,
+    setdiff(seq_len(nrow(df_small)), earth_i)[1:(n_small - 1)]
+  )
+  df_small <- df_small[keep_idx, , drop = FALSE]
+}
+
+#  Make sure earth is preset
+stopifnot("Earth" %in% df_small$pl_name)
+
+# Look at the small sample
+View(df_small)
+
+# Fit to small model
 model_small <- glm(can_hold_water ~ pl_eqt + v_esc_kms + density_gcc,
                    data = df_small, family = binomial)
 
