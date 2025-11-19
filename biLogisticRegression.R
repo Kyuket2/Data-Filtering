@@ -92,9 +92,6 @@ df_ranked$density_gcc <- round(df_ranked$density_gcc, 2)
 # Rounds WRS to 4 decimal places
 df_ranked$WRS <- round(df_ranked$WRS, 4)
 
-# Export File
-write.csv(df_ranked, "ranked_exoplanets_WRS.csv", row.names = FALSE)
-
 # Interactive Table 
 datatable(df_ranked,
           options = list(pageLength = 15, autoWidth = TRUE),

@@ -1,0 +1,98 @@
+# Packages
+library(DT)
+library(ggplot2)
+library(logistf)
+windows()
+
+# Load dataset
+df <- read.csv("csv/exoplanets_filtered_default.csv", comment.char = "#", stringsAsFactors = FALSE)
+
+# Get values for density and escape velocity
+df$density_gcc <- 5.514 * (df$pl_bmasse / (df$pl_rade^3))  # density (g/cc)
+df$v_esc_kms   <- 11.2  * sqrt(df$pl_bmasse / df$pl_rade)  # escape velocity (km/s)
+
+# Clean names
+df$pl_name <- trimws(df$pl_name)
+
+# Earth data
+earth_temp <- 288.15   # K
+earth_vesc <- 11.19    # km/s
+earth_dens <- 5.51     # g/cc
+
+earth <- data.frame(
+  pl_eqt       = 255,
+  pl_bmasse    = 1,
+  pl_rade      = 1,
+  density_gcc  = 5.514,
+  v_esc_kms    = 11.2
+)
+
+# If Earth is not in the table, add it
+if (!"Earth" %in% df$pl_name) {
+  earth_row <- as.data.frame(setNames(as.list(rep(NA, ncol(df))), names(df)))
+  earth_row$pl_name     <- "Earth"
+  earth_row$pl_eqt      <- earth_temp
+  earth_row$v_esc_kms   <- earth_vesc
+  earth_row$density_gcc <- earth_dens
+  earth_row$pl_bmasse   <- 1
+  earth_row$pl_rade     <- 1
+  df <- rbind(df, earth_row)
+}
+
+# Keep needed rows
+need <- c("pl_eqt","v_esc_kms","density_gcc")
+df <- df[complete.cases(df[ , need]), ]
+
+# Regression
+df$can_hold_water <- ifelse(
+  df$pl_eqt >= 200 & df$pl_eqt <= 350 &
+  df$v_esc_kms >= 8 &
+  df$density_gcc >= 3, 1, 0
+)
+
+# Models
+model_firth <- logistf(can_hold_water ~ pl_eqt + v_esc_kms + density_gcc,
+                       data = df)
+
+model <- glm(can_hold_water ~ pl_eqt + v_esc_kms + density_gcc,
+             data = df, family = binomial)
+
+coef_glm <- coef(model)
+coef_firth <- coef(model_firth)
+
+cat("\n=== Coefficients side by side ===\n")
+print(cbind(GLM = round(coef_glm,   4),
+            Firth = round(coef_firth, 4)))
+
+# Weights
+firth_vals   <- abs(coef_firth[-1])
+firth_weights <- firth_vals / sum(firth_vals)
+
+glm_vals  <- abs(coef_glm[-1])
+glm_weights <- glm_vals / sum(glm_vals)
+
+
+cat("\n=== GLM weights ===\n")
+print(round(glm_weights, 3))
+cat("\n=== Firth weights ===\n")
+print(round(firth_weights, 3))
+
+# Put weights into a single dataframe
+weights_df <- data.frame(
+  factor = rep(names(glm_weights), 2),
+  weight = c(as.numeric(glm_weights), as.numeric(firth_weights)),
+  model  = rep(c("GLM", "Firth"), each = length(glm_weights))
+)
+
+# Plot
+ggplot(weights_df, aes(x = factor, y = weight, fill = model)) +
+  geom_col(position = "dodge") +
+  geom_text(aes(label = sprintf("%.3f", weight)),
+            position = position_dodge(0.9),
+            vjust = -0.2,
+            size = 4) +
+  labs(title = "Comparison of Weights in Models",
+       x = "Exoplanet",
+       y = "Normalized Weight (sum = 1)") +
+  theme_minimal(base_size = 14)
+

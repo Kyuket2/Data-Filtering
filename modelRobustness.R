@@ -44,6 +44,7 @@ if (!"Earth" %in% df$pl_name) {
   # Bind it
   df <- rbind(df, earth_row)
 }
+
 # Choose sample size
 n_small <- min(500, nrow(df))
 
