@@ -18,7 +18,7 @@ df$can_hold_water <- ifelse(
   df$density_gcc >= 3, 1, 0
 )
 
-set.seed(42)
+set.seed(0)
 
 idx1 <- which(df$can_hold_water == 1)
 idx0 <- which(df$can_hold_water == 0)
@@ -32,6 +32,16 @@ train70 <- df[train_idx_70, ]
 test30  <- df[-train_idx_70, ]
 
 table(train70$can_hold_water)
+
+pos_train70 <- train70$pl_name[train70$can_hold_water == 1]
+pos_test30  <- test30$pl_name[test30$can_hold_water == 1]
+
+cat("\nPositives in TRAIN (70%):", length(pos_train70), "\n")
+print(pos_train70)
+
+cat("\nPositives in TEST (30%):", length(pos_test30), "\n")
+print(pos_test30)
+
 table(test30$can_hold_water)
 
 model_firth_70 <- logistf(
@@ -53,10 +63,10 @@ recovered_70 <- subset(true_ones_test30, predicted_water == 1)
 cat("Recovered (70% training):", nrow(recovered_70), "\n")
 recovered_70$pl_name
 
-top20_70 <- test30[order(test30$prob, decreasing = TRUE), ][1:18,
+top20_70 <- test30[order(test30$prob, decreasing = TRUE), ][1:20,
   c("pl_name", "prob", "can_hold_water")]
 
 top20_70
-cat("True water-capable in top 18:",
+cat("True water-capable in top 20:",
     sum(top20_70$can_hold_water == 1), "\n")
 
