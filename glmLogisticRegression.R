@@ -3,7 +3,7 @@ library(ggplot2)
 windows()
 
 # Load dataset
-df <- read.csv("exoplanets_filtered_default.csv", comment.char = "#", stringsAsFactors = FALSE)
+df <- read.csv("csv/exoplanets_filtered_default.csv", comment.char = "#", stringsAsFactors = FALSE)
 
 # Get values for density and escape velocity
 df$density_gcc <- 5.514 * (df$pl_bmasse / (df$pl_rade^3))  # density (g/cc)
@@ -119,3 +119,4 @@ ggplot(df_with_earth, aes(x = WRS)) +
     y = "Number of Exoplanets"
   ) +
   theme_minimal(base_size = 13)
+  

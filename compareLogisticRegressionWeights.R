@@ -14,31 +14,6 @@ df$v_esc_kms   <- 11.2  * sqrt(df$pl_bmasse / df$pl_rade)  # escape velocity (km
 # Clean names
 df$pl_name <- trimws(df$pl_name)
 
-# Earth data
-earth_temp <- 288.15   # K
-earth_vesc <- 11.19    # km/s
-earth_dens <- 5.51     # g/cc
-
-earth <- data.frame(
-  pl_eqt       = 255,
-  pl_bmasse    = 1,
-  pl_rade      = 1,
-  density_gcc  = 5.514,
-  v_esc_kms    = 11.2
-)
-
-# If Earth is not in the table, add it
-if (!"Earth" %in% df$pl_name) {
-  earth_row <- as.data.frame(setNames(as.list(rep(NA, ncol(df))), names(df)))
-  earth_row$pl_name     <- "Earth"
-  earth_row$pl_eqt      <- earth_temp
-  earth_row$v_esc_kms   <- earth_vesc
-  earth_row$density_gcc <- earth_dens
-  earth_row$pl_bmasse   <- 1
-  earth_row$pl_rade     <- 1
-  df <- rbind(df, earth_row)
-}
-
 # Keep needed rows
 need <- c("pl_eqt","v_esc_kms","density_gcc")
 df <- df[complete.cases(df[ , need]), ]

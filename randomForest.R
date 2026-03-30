@@ -1,5 +1,3 @@
-# install.packages("randomForest")
-
 library(randomForest)
 
 # Load dataset
@@ -31,8 +29,18 @@ rf_model <- randomForest(
   importance = TRUE
 )
 
-print(rf_model)
-importance(rf_model)
+# --- Get predictions ---
+rf_prob <- predict(rf_model, df, type = "prob")
+
+# Combine habitable classes (complex + microbial)
+df$prob_habitable <- rf_prob[, "complex"] + rf_prob[, "microbial"]
+
+# Sort by most habitable
+top_habitable <- df[order(-df$prob_habitable), ]
+
+# Show top 10 planets
+head(top_habitable[, c("pl_name", "prob_habitable", "HT_class")], 50)
+
 
 # This is to test without temp: 
 # ____________________________________________________________________________________________

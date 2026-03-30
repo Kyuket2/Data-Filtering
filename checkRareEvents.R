@@ -13,9 +13,6 @@ df$v_esc_kms   <- 11.2  * sqrt(df$pl_bmasse / df$pl_rade)  # escape velocity (km
 need <- c("pl_eqt","v_esc_kms","density_gcc")
 df <- df[complete.cases(df[ , need]), ]
 
-# Add in Earth
-df[nrow(df) + 1, c("pl_eqt","v_esc_kms","density_gcc")] <- c(288.15, 11.2, 5.51)
-
 # Regression
 df$can_hold_water <- ifelse(
   df$pl_eqt >= 200 & df$pl_eqt <= 350 &

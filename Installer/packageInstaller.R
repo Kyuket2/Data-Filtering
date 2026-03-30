@@ -1,4 +1,4 @@
-# List of packages
+# List of all the needed packages
 required_packages <- c(
   "ggplot2",
   "dplyr",
@@ -22,4 +22,4 @@ for (pkg in required_packages) {
   }
 }
 
-cat("\n All required packages are installed and ready to use.\n")
+cat("\n All required packages are installed and ready to use. Nice!\n")

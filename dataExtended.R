@@ -20,5 +20,3 @@ rf_model <- randomForest(
 # Print out the results
 print(rf_model)
 importance(rf_model)
-
-# End

@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load dataset
-file_path = "PS_2025.09.10_12.52.37.csv"
+file_path = "csv/PS_2025.09.10_12.52.37.csv"
 df = pd.read_csv(file_path, comment="#", low_memory=False)
 print("Loaded dataset:", df.shape[0], "rows,", df.shape[1], "columns")
 
@@ -55,6 +55,6 @@ print("\n🔹 Sample data:")
 print(df_clean.head(10).to_string(index=False))
 
 # Save filtered data
-df_clean.to_csv("exoplanets_filtered_default.csv", index=False)
+df_clean.to_csv("exoplanets_filtered_default.csv2", index=False)
 print("Saved filtered data")
 
